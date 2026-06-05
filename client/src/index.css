@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: radial-gradient(circle at top, #d6d7dc, #05070f);
+  color: #dee6f5;
+}
+
+/* smooth interactions */
+button, input, select {
+  transition: all 0.25s ease;
+  border-radius: 12px;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+input, select {
+  background: rgba(239, 229, 229, 0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgb(222, 210, 210);
+  padding: 10px;
+  outline: none;
+}
+
+table {
+  border-collapse: collapse;
+}
