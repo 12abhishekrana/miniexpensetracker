@@ -1,84 +1,52 @@
 const router = require("express").Router();
-const fs = require("fs");
-const path = require("path");
-const { v4: uuidv4 } = require("uuid");
-
-const FILE_PATH = path.join(
-  __dirname,
-  "../data/expenses.json"
-);
+const Expense = require("../models/Expense");
 
 // --------------------
-// READ
+// GET ALL EXPENSES
 // --------------------
-function readExpenses() {
+router.get("/", async (req, res) => {
   try {
-    const data = fs.readFileSync(FILE_PATH, "utf8");
-    return JSON.parse(data);
-  } catch {
-    return [];
+    const expenses = await Expense.find().sort({ createdAt: -1 });
+    res.json(expenses);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-}
-
-// --------------------
-// SAVE
-// --------------------
-function saveExpenses(expenses) {
-  fs.writeFileSync(
-    FILE_PATH,
-    JSON.stringify(expenses, null, 2)
-  );
-}
-
-// --------------------
-// GET ALL
-// --------------------
-router.get("/", (req, res) => {
-  const expenses = readExpenses();
-  res.json(expenses);
 });
 
 // --------------------
 // ADD EXPENSE
 // --------------------
-router.post("/", (req, res) => {
-  const { amount, category, date, note } = req.body;
+router.post("/", async (req, res) => {
+  try {
+    const { amount, category, date, note } = req.body;
 
-  if (!amount || !category || !date) {
-    return res.status(400).json({
-      message: "Invalid input"
+    if (!amount || !category || !date) {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+
+    const expense = await Expense.create({
+      amount: Number(amount),
+      category,
+      date,
+      note: note || ""
     });
+
+    res.status(201).json(expense);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  const expenses = readExpenses();
-
-  const newExpense = {
-    id: uuidv4(),
-    amount: Number(amount),
-    category,
-    date,
-    note: note || ""
-  };
-
-  expenses.push(newExpense);
-  saveExpenses(expenses);
-
-  res.status(201).json(newExpense);
 });
 
 // --------------------
-// DELETE
+// DELETE EXPENSE
 // --------------------
-router.delete("/:id", (req, res) => {
-  let expenses = readExpenses();
-
-  expenses = expenses.filter(
-    (e) => e.id !== req.params.id
-  );
-
-  saveExpenses(expenses);
-
-  res.json({ message: "Deleted" });
+router.delete("/:id", async (req, res) => {
+  try {
+    await Expense.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted Successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;
