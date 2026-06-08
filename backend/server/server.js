@@ -10,26 +10,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() =>
-    console.log("MongoDB Connected")
-  )
-  .catch((err) =>
-    console.error(err)
-  );
+async function startServer() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
 
-app.use("/api/expenses", expenseRoutes);
+    console.log("MongoDB Connected");
 
-app.get("/", (req, res) => {
-  res.send("FinSaaS API Running");
-});
+    app.use("/api/expenses", expenseRoutes);
 
-const PORT =
-  process.env.PORT || 5000;
+    app.get("/", (req, res) => {
+      res.send("API Running");
+    });
 
-app.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT}`
-  );
-});
+    const PORT = process.env.PORT || 5000;
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("DB Error:", err);
+  }
+}
+
+startServer();
