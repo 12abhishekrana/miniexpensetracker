@@ -1,51 +1,37 @@
 const router = require("express").Router();
-const mongoose = require("mongoose");
 const Expense = require("../models/Expense");
 
-// GET ALL EXPENSES
+// GET ALL EXPENSES (per user)
 router.get("/", async (req, res) => {
   try {
-    console.log(
-      "Mongo State:",
-      mongoose.connection.readyState
-    );
+    const userId = req.headers.userid;
 
-    const expenses = await Expense.find().sort({
+    const expenses = await Expense.find({ userId }).sort({
       createdAt: -1,
     });
 
     res.json(expenses);
   } catch (err) {
-    console.error("GET ERROR:", err);
-
-    res.status(500).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 });
 
-// ADD EXPENSE
+// ADD EXPENSE (per user)
 router.post("/", async (req, res) => {
   try {
-    console.log(
-      "Mongo State:",
-      mongoose.connection.readyState
-    );
+    const { amount, category, date, note } = req.body;
+    const userId = req.headers.userid;
 
-    const {
-      amount,
-      category,
-      date,
-      note,
-    } = req.body;
+    if (!userId) {
+      return res.status(400).json({ message: "UserId missing" });
+    }
 
     if (!amount || !category || !date) {
-      return res.status(400).json({
-        message: "Invalid input",
-      });
+      return res.status(400).json({ message: "Invalid input" });
     }
 
     const expense = await Expense.create({
+      userId,
       amount: Number(amount),
       category,
       date,
@@ -54,35 +40,23 @@ router.post("/", async (req, res) => {
 
     res.status(201).json(expense);
   } catch (err) {
-    console.error("POST ERROR:", err);
-
-    res.status(500).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 });
 
-// DELETE EXPENSE
+// DELETE EXPENSE (per user)
 router.delete("/:id", async (req, res) => {
   try {
-    console.log(
-      "Mongo State:",
-      mongoose.connection.readyState
-    );
+    const userId = req.headers.userid;
 
-    await Expense.findByIdAndDelete(
-      req.params.id
-    );
-
-    res.json({
-      message: "Deleted Successfully",
+    await Expense.deleteOne({
+      _id: req.params.id,
+      userId,
     });
+
+    res.json({ message: "Deleted Successfully" });
   } catch (err) {
-    console.error("DELETE ERROR:", err);
-
-    res.status(500).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 });
 
