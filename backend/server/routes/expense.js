@@ -1,12 +1,10 @@
 const router = require("express").Router();
 const Expense = require("../models/Expense");
 
-// GET ALL EXPENSES (per user)
+// GET ALL
 router.get("/", async (req, res) => {
   try {
-    const userId = req.headers.userid;
-
-    const expenses = await Expense.find({ userId }).sort({
+    const expenses = await Expense.find().sort({
       createdAt: -1,
     });
 
@@ -16,22 +14,16 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ADD EXPENSE (per user)
+// ADD
 router.post("/", async (req, res) => {
   try {
     const { amount, category, date, note } = req.body;
-    const userId = req.headers.userid;
-
-    if (!userId) {
-      return res.status(400).json({ message: "UserId missing" });
-    }
 
     if (!amount || !category || !date) {
       return res.status(400).json({ message: "Invalid input" });
     }
 
     const expense = await Expense.create({
-      userId,
       amount: Number(amount),
       category,
       date,
@@ -44,15 +36,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-// DELETE EXPENSE (per user)
+// DELETE
 router.delete("/:id", async (req, res) => {
   try {
-    const userId = req.headers.userid;
-
-    await Expense.deleteOne({
-      _id: req.params.id,
-      userId,
-    });
+    await Expense.findByIdAndDelete(req.params.id);
 
     res.json({ message: "Deleted Successfully" });
   } catch (err) {
