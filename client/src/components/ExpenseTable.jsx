@@ -17,7 +17,7 @@ function ExpenseTable({ expenses, onDelete }) {
   
             <tbody>
               {expenses.map((e) => (
-                <tr key={e.id}>
+                <tr key={e._id}>
                   <td style={styles.td}>₹{e.amount}</td>
                   <td style={styles.td}>{e.category}</td>
                   <td style={styles.td}>
@@ -27,7 +27,7 @@ function ExpenseTable({ expenses, onDelete }) {
   
                   <td style={styles.td}>
                     <button
-                      onClick={() => onDelete(e.id)}
+                      onClick={() => onDelete(e._id)}
                       style={styles.btn}
                     >
                       Delete
